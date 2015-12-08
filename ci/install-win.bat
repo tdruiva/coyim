@@ -39,4 +39,6 @@ mkdir %GOPATH%\src\github.com\twstrike\
 xcopy %APPVEYOR_BUILD_FOLDER%\* %GOPATH%\src\github.com\twstrike\coyim /e /i /EXCLUDE:%MSYS_PATH% > $nul
 dir %GOPATH%\src\github.com\twstrike\coyim
 
+%MSYS_PATH%\usr\bin\bash -lc "go env"
 %MSYS_PATH%\usr\bin\bash -lc "cd /c/gopath/src/github.com/twstrike/coyim && make deps"
+
