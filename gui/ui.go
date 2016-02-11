@@ -102,6 +102,11 @@ func NewGTK(version string, sf sessions.Factory, df func() interfaces.Dialer, gx
 
 	ret.accountChangedSignal, _ = g.glib.SignalNew("coyim-account-changed")
 
+	// These signals need to exist, but aren't used anywhere in code right now.
+	// We do emit them from the ui-defined pieces
+	g.glib.SignalNew("enable")
+	g.glib.SignalNew("disable")
+
 	var err error
 	flags := glib.APPLICATION_FLAGS_NONE
 	if *config.MultiFlag {
