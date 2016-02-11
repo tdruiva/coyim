@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/i18n"
 	"github.com/twstrike/coyim/session/events"
 	"github.com/twstrike/coyim/xmpp/utils"
@@ -162,7 +162,7 @@ func (u *gtkUI) handlePeerEvent(ev events.Peer) {
 		})
 
 	case events.SubscriptionRequest:
-		confirmDialog := authorizePresenceSubscriptionDialog(&u.window.Window, ev.From)
+		confirmDialog := authorizePresenceSubscriptionDialog(u.window, ev.From)
 
 		doInUIThread(func() {
 			responseType := gtk.ResponseType(confirmDialog.Run())

@@ -3,25 +3,25 @@ package gui
 import (
 	"fmt"
 
-	"github.com/gotk3/gotk3/gtk"
-	"github.com/gotk3/gotk3/pango"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
+	pango "github.com/gotk3/gotk3/pango/iface"
 )
 
 type displaySettings struct {
 	fontSize        uint
 	defaultFontSize uint
 
-	provider *gtk.CssProvider
+	provider gtk.CssProvider
 }
 
-func (ds *displaySettings) defaultSettingsOn(w *gtk.Widget) {
+func (ds *displaySettings) defaultSettingsOn(w gtk.Widget) {
 	doInUIThread(func() {
 		styleContext, _ := w.GetStyleContext()
 		styleContext.AddProvider(ds.provider, 9999)
 	})
 }
 
-func (ds *displaySettings) unifiedBackgroundColor(w *gtk.Widget) {
+func (ds *displaySettings) unifiedBackgroundColor(w gtk.Widget) {
 	doInUIThread(func() {
 		styleContext, _ := w.GetStyleContext()
 		styleContext.AddProvider(ds.provider, 9999)
@@ -29,7 +29,7 @@ func (ds *displaySettings) unifiedBackgroundColor(w *gtk.Widget) {
 	})
 }
 
-func (ds *displaySettings) control(w *gtk.Widget) {
+func (ds *displaySettings) control(w gtk.Widget) {
 	doInUIThread(func() {
 		styleContext, _ := w.GetStyleContext()
 		styleContext.AddProvider(ds.provider, 9999)
@@ -68,16 +68,16 @@ func (ds *displaySettings) update() {
 
 func newDisplaySettings() *displaySettings {
 	ds := &displaySettings{}
-	prov, _ := gtk.CssProviderNew()
+	prov, _ := g.gtk.CssProviderNew()
 	ds.provider = prov
 	ds.defaultFontSize = 12
 	return ds
 }
 
-func detectCurrentDisplaySettingsFrom(w *gtk.Widget) *displaySettings {
+func detectCurrentDisplaySettingsFrom(w gtk.Widget) *displaySettings {
 	styleContext, _ := w.GetStyleContext()
-	property, _ := styleContext.GetProperty("font", gtk.STATE_FLAG_NORMAL)
-	fontDescription := property.(*pango.FontDescription)
+	property, _ := styleContext.GetProperty2("font", gtk.STATE_FLAG_NORMAL)
+	fontDescription := property.(pango.FontDescription)
 
 	size := uint(fontDescription.GetSize() / pango.PANGO_SCALE)
 	ds := newDisplaySettings()

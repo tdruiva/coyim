@@ -3,12 +3,12 @@ package gui
 import (
 	"fmt"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/i18n"
 )
 
 func (u *gtkUI) showConnectAccountNotification(account *account) func() {
-	var notification *gtk.InfoBar
+	var notification gtk.InfoBar
 
 	doInUIThread(func() {
 		notification = account.buildConnectionNotification()
@@ -36,21 +36,21 @@ func (u *gtkUI) notifyConnectionFailure(account *account) {
 	})
 }
 
-func buildVerifyIdentityNotification(acc *account, peer string, win *gtk.Window) *gtk.InfoBar {
+func buildVerifyIdentityNotification(acc *account, peer string, win gtk.Window) gtk.InfoBar {
 	builder := builderForDefinition("VerifyIdentityNotification")
 
 	obj, _ := builder.GetObject("infobar")
-	infoBar := obj.(*gtk.InfoBar)
+	infoBar := obj.(gtk.InfoBar)
 
 	obj, _ = builder.GetObject("message")
-	message := obj.(*gtk.Label)
+	message := obj.(gtk.Label)
 	message.SetSelectable(true)
 
 	text := fmt.Sprintf(i18n.Local("You have not verified the identity of %s"), peer)
 	message.SetText(text)
 
 	obj, _ = builder.GetObject("button_verify")
-	button := obj.(*gtk.Button)
+	button := obj.(gtk.Button)
 	button.Connect("clicked", func() {
 		doInUIThread(func() {
 			resp := verifyFingerprintDialog(acc, peer, win)
@@ -69,7 +69,7 @@ func buildVerifyIdentityNotification(acc *account, peer string, win *gtk.Window)
 func (u *gtkUI) notify(title, message string) {
 	builder := builderForDefinition("SimpleNotification")
 	obj, _ := builder.GetObject("dialog")
-	dlg := obj.(*gtk.MessageDialog)
+	dlg := obj.(gtk.MessageDialog)
 
 	dlg.SetProperty("title", title)
 	dlg.SetProperty("text", message)

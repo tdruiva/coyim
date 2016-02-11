@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 )
 
 const (
@@ -24,12 +24,12 @@ var ulAllIndexValues = []int{0, 1, 2, 3, 4, 5, 6, 7}
 type unifiedLayout struct {
 	ui           *gtkUI
 	cl           *conversationList
-	leftPane     *gtk.Box
-	revealer     *gtk.Revealer
-	notebook     *gtk.Notebook
-	header       *gtk.Label
-	headerBox    *gtk.Box
-	close        *gtk.Button
+	leftPane     gtk.Box
+	revealer     gtk.Revealer
+	notebook     gtk.Notebook
+	header       gtk.Label
+	headerBox    gtk.Box
+	close        gtk.Button
 	convsVisible bool
 	inPageSet    bool
 	itemMap      map[int]*conversationStackItem
@@ -37,18 +37,18 @@ type unifiedLayout struct {
 
 type conversationList struct {
 	layout *unifiedLayout
-	view   *gtk.TreeView
-	model  *gtk.ListStore
+	view   gtk.TreeView
+	model  gtk.ListStore
 }
 
 type conversationStackItem struct {
 	*conversationPane
 	pageIndex int
-	iter      *gtk.TreeIter
+	iter      gtk.TreeIter
 	layout    *unifiedLayout
 }
 
-func newUnifiedLayout(ui *gtkUI, left, parent *gtk.Box) *unifiedLayout {
+func newUnifiedLayout(ui *gtkUI, left, parent gtk.Box) *unifiedLayout {
 	ul := &unifiedLayout{
 		ui:       ui,
 		cl:       &conversationList{},
@@ -83,7 +83,7 @@ func newUnifiedLayout(ui *gtkUI, left, parent *gtk.Box) *unifiedLayout {
 }
 
 func (ul *unifiedLayout) createConversation(account *account, uid string) conversationView {
-	cp := createConversationPane(account, uid, ul.ui, &ul.ui.window.Window)
+	cp := createConversationPane(account, uid, ul.ui, ul.ui.window)
 	cp.menubar.Hide()
 	idx := ul.notebook.AppendPage(cp.widget, nil)
 	if idx < 0 {
@@ -132,7 +132,7 @@ func (cl *conversationList) updateItem(csi *conversationStackItem) {
 		log.Printf("No peer found for %s", csi.to)
 		return
 	}
-	cl.model.Set(csi.iter, ulAllIndexValues, []interface{}{
+	cl.model.Set2(csi.iter, ulAllIndexValues, []interface{}{
 		csi.pageIndex,
 		csi.shortName(),
 		peer.Jid,
@@ -218,8 +218,8 @@ func (csi *conversationStackItem) remove() {
 	csi.widget.Hide()
 }
 
-func (cl *conversationList) getItemForIter(iter *gtk.TreeIter) *conversationStackItem {
-	val, err := cl.model.GetValue(iter, ulIndexID)
+func (cl *conversationList) getItemForIter(iter gtk.TreeIter) *conversationStackItem {
+	val, err := cl.model.(gtk.TreeModel).GetValue(iter, ulIndexID)
 	if err != nil {
 		log.Printf("Error getting ulIndexID value: %v", err)
 		return nil
@@ -232,8 +232,8 @@ func (cl *conversationList) getItemForIter(iter *gtk.TreeIter) *conversationStac
 	return cl.layout.itemMap[gv.(int)]
 }
 
-func (cl *conversationList) onActivate(v *gtk.TreeView, path *gtk.TreePath) {
-	iter, err := cl.model.GetIter(path)
+func (cl *conversationList) onActivate(v gtk.TreeView, path gtk.TreePath) {
+	iter, err := cl.model.(gtk.TreeModel).GetIter(path)
 	if err != nil {
 		log.Printf("Error converting path to iter: %v", err)
 		return
@@ -246,9 +246,9 @@ func (cl *conversationList) onActivate(v *gtk.TreeView, path *gtk.TreePath) {
 
 func (cl *conversationList) removeSelection() {
 	ts, _ := cl.view.GetSelection()
-	var iter gtk.TreeIter
-	if ts.GetSelected(nil, &iter) {
-		path, _ := cl.model.GetPath(&iter)
+	iter := g.gtk.TreeIterNew()
+	if ts.GetSelected(nil, iter) {
+		path, _ := cl.model.(gtk.TreeModel).GetPath(iter)
 		ts.UnselectPath(path)
 	}
 }
@@ -275,7 +275,7 @@ func (ul *unifiedLayout) onCloseClicked() {
 	}
 }
 
-func (ul *unifiedLayout) onSwitchPage(notebook *gtk.Notebook, page *gtk.Widget, idx int) {
+func (ul *unifiedLayout) onSwitchPage(notebook gtk.Notebook, page gtk.Widget, idx int) {
 	if ul.inPageSet {
 		return
 	}
@@ -286,7 +286,7 @@ func (ul *unifiedLayout) onSwitchPage(notebook *gtk.Notebook, page *gtk.Widget, 
 }
 
 func (ul *unifiedLayout) displayFirstConvo() bool {
-	if iter, ok := ul.cl.model.GetIterFirst(); ok {
+	if iter, ok := ul.cl.model.(gtk.TreeModel).GetIterFirst(); ok {
 		if csi := ul.cl.getItemForIter(iter); csi != nil {
 			csi.bringToFront()
 			return true
@@ -296,7 +296,7 @@ func (ul *unifiedLayout) displayFirstConvo() bool {
 }
 
 func (ul *unifiedLayout) update() {
-	for it, ok := ul.cl.model.GetIterFirst(); ok; ok = ul.cl.model.IterNext(it) {
+	for it, ok := ul.cl.model.(gtk.TreeModel).GetIterFirst(); ok; ok = ul.cl.model.(gtk.TreeModel).IterNext(it) {
 		csi := ul.cl.getItemForIter(it)
 		if csi != nil {
 			ul.cl.updateItem(csi)

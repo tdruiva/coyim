@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gotk3/gotk3/glib"
-	"github.com/gotk3/gotk3/gtk"
+	glib "github.com/gotk3/gotk3/glib/iface"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/config"
 	"github.com/twstrike/coyim/i18n"
 	"github.com/twstrike/coyim/net"
@@ -15,26 +15,27 @@ import (
 )
 
 type accountDetailsData struct {
-	builder             *gtk.Builder
-	dialog              *gtk.Dialog
-	notebook            *gtk.Notebook
-	otherSettings       *gtk.CheckButton
-	acc                 *gtk.Entry
-	pass                *gtk.Entry
-	server              *gtk.Entry
-	port                *gtk.Entry
-	proxies             *gtk.ListStore
-	notificationArea    *gtk.Box
-	proxiesView         *gtk.TreeView
-	fingerprintsMessage *gtk.Label
+	builder             gtk.Builder
+	dialog              gtk.Dialog
+	notebook            gtk.Notebook
+	otherSettings       gtk.CheckButton
+	acc                 gtk.Entry
+	pass                gtk.Entry
+	server              gtk.Entry
+	port                gtk.Entry
+	proxies             gtk.ListStore
+	proxiesM            gtk.TreeModel
+	notificationArea    gtk.Box
+	proxiesView         gtk.TreeView
+	fingerprintsMessage gtk.Label
 }
 
-func getObjIgnoringErrors(b *gtk.Builder, name string) glib.IObject {
+func getObjIgnoringErrors(b gtk.Builder, name string) glib.Object {
 	obj, _ := b.GetObject(name)
 	return obj
 }
 
-func (d *accountDetailsData) getObjIgnoringErrors(name string) glib.IObject {
+func (d *accountDetailsData) getObjIgnoringErrors(name string) glib.Object {
 	return getObjIgnoringErrors(d.builder, name)
 }
 
@@ -44,17 +45,18 @@ func getBuilderAndAccountDialogDetails() *accountDetailsData {
 	dialogID := "AccountDetails"
 	data.builder = builderForDefinition(dialogID)
 
-	data.dialog = data.getObjIgnoringErrors(dialogID).(*gtk.Dialog)
-	data.notebook = data.getObjIgnoringErrors("notebook1").(*gtk.Notebook)
-	data.otherSettings = data.getObjIgnoringErrors("otherSettings").(*gtk.CheckButton)
-	data.acc = data.getObjIgnoringErrors("account").(*gtk.Entry)
-	data.pass = data.getObjIgnoringErrors("password").(*gtk.Entry)
-	data.server = data.getObjIgnoringErrors("server").(*gtk.Entry)
-	data.port = data.getObjIgnoringErrors("port").(*gtk.Entry)
-	data.proxies = data.getObjIgnoringErrors("proxies-model").(*gtk.ListStore)
-	data.notificationArea = data.getObjIgnoringErrors("notification-area").(*gtk.Box)
-	data.proxiesView = data.getObjIgnoringErrors("proxies-view").(*gtk.TreeView)
-	data.fingerprintsMessage = data.getObjIgnoringErrors("fingerprintsMessage").(*gtk.Label)
+	data.dialog = data.getObjIgnoringErrors(dialogID).(gtk.Dialog)
+	data.notebook = data.getObjIgnoringErrors("notebook1").(gtk.Notebook)
+	data.otherSettings = data.getObjIgnoringErrors("otherSettings").(gtk.CheckButton)
+	data.acc = data.getObjIgnoringErrors("account").(gtk.Entry)
+	data.pass = data.getObjIgnoringErrors("password").(gtk.Entry)
+	data.server = data.getObjIgnoringErrors("server").(gtk.Entry)
+	data.port = data.getObjIgnoringErrors("port").(gtk.Entry)
+	data.proxies = data.getObjIgnoringErrors("proxies-model").(gtk.ListStore)
+	data.proxiesM = data.proxies.(gtk.TreeModel)
+	data.notificationArea = data.getObjIgnoringErrors("notification-area").(gtk.Box)
+	data.proxiesView = data.getObjIgnoringErrors("proxies-view").(gtk.TreeView)
+	data.fingerprintsMessage = data.getObjIgnoringErrors("fingerprintsMessage").(gtk.Label)
 
 	return data
 }
@@ -102,8 +104,8 @@ func (u *gtkUI) accountDialog(s access.Session, account *config.Account, saveFun
 
 	failures := 0
 
-	editProxy := func(iter *gtk.TreeIter, onCancel func()) {
-		val, _ := data.proxies.GetValue(iter, 1)
+	editProxy := func(iter gtk.TreeIter, onCancel func()) {
+		val, _ := data.proxiesM.GetValue(iter, 1)
 		realProxyData, _ := val.GetString()
 		u.editProxy(realProxyData, data.dialog,
 			func(p net.Proxy) {
@@ -163,12 +165,12 @@ func (u *gtkUI) accountDialog(s access.Session, account *config.Account, saveFun
 			account.Port = convertedPort
 
 			newProxies := []string{}
-			iter, ok := data.proxies.GetIterFirst()
+			iter, ok := data.proxiesM.GetIterFirst()
 			for ok {
-				vv, _ := data.proxies.GetValue(iter, 1)
+				vv, _ := data.proxiesM.GetValue(iter, 1)
 				newProxy, _ := vv.GetString()
 				newProxies = append(newProxies, newProxy)
-				ok = data.proxies.IterNext(iter)
+				ok = data.proxiesM.IterNext(iter)
 			}
 
 			account.Proxies = newProxies
@@ -178,16 +180,16 @@ func (u *gtkUI) accountDialog(s access.Session, account *config.Account, saveFun
 		},
 		"on_edit_proxy_signal": func() {
 			ts, _ := data.proxiesView.GetSelection()
-			var iter gtk.TreeIter
-			if ts.GetSelected(nil, &iter) {
-				editProxy(&iter, func() {})
+			iter := g.gtk.TreeIterNew()
+			if ts.GetSelected(nil, iter) {
+				editProxy(iter, func() {})
 			}
 		},
 		"on_remove_proxy_signal": func() {
 			ts, _ := data.proxiesView.GetSelection()
-			var iter gtk.TreeIter
-			if ts.GetSelected(nil, &iter) {
-				data.proxies.Remove(&iter)
+			iter := g.gtk.TreeIterNew()
+			if ts.GetSelected(nil, iter) {
+				data.proxies.Remove(iter)
 			}
 		},
 		"on_add_proxy_signal": func() {
@@ -200,8 +202,8 @@ func (u *gtkUI) accountDialog(s access.Session, account *config.Account, saveFun
 				data.proxies.Remove(iter)
 			})
 		},
-		"on_edit_activate_proxy_signal": func(_ *gtk.TreeView, path *gtk.TreePath) {
-			iter, err := data.proxies.GetIter(path)
+		"on_edit_activate_proxy_signal": func(_ gtk.TreeView, path gtk.TreePath) {
+			iter, err := data.proxiesM.GetIter(path)
 			if err == nil {
 				editProxy(iter, func() {})
 			}
@@ -236,11 +238,11 @@ func (u *gtkUI) accountDialog(s access.Session, account *config.Account, saveFun
 	}
 }
 
-func buildBadUsernameNotification(msg string) *gtk.InfoBar {
+func buildBadUsernameNotification(msg string) gtk.InfoBar {
 	b := builderForDefinition("BadUsernameNotification")
 
-	infoBar := getObjIgnoringErrors(b, "infobar").(*gtk.InfoBar)
-	message := getObjIgnoringErrors(b, "message").(*gtk.Label)
+	infoBar := getObjIgnoringErrors(b, "infobar").(gtk.InfoBar)
+	message := getObjIgnoringErrors(b, "message").(gtk.Label)
 
 	message.SetSelectable(true)
 	message.SetText(fmt.Sprintf(i18n.Local(msg)))

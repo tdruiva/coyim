@@ -1,13 +1,13 @@
 package gui
 
 import (
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/config"
 )
 
 type viewMenu struct {
-	merge   *gtk.CheckMenuItem
-	offline *gtk.CheckMenuItem
+	merge   gtk.CheckMenuItem
+	offline gtk.CheckMenuItem
 }
 
 func (v *viewMenu) setFromConfig(c *config.ApplicationConfig) {

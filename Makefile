@@ -58,6 +58,7 @@ run-cover: clean-cover
 	go test -coverprofile=.coverprofiles/config.coverprofile  ./config
 	go test -coverprofile=.coverprofiles/config_importer.coverprofile  ./config/importer
 	go test -coverprofile=.coverprofiles/event.coverprofile   ./event
+	go test -coverprofile=.coverprofiles/gui.coverprofile     ./gui
 	go test -coverprofile=.coverprofiles/i18n.coverprofile    ./i18n
 	go test -coverprofile=.coverprofiles/net.coverprofile     ./net
 	go test -coverprofile=.coverprofiles/roster.coverprofile  ./roster
@@ -69,14 +70,13 @@ run-cover: clean-cover
 	go test -coverprofile=.coverprofiles/session.coverprofile ./session
 	go test -coverprofile=.coverprofiles/xmpp.coverprofile    ./xmpp
 	go test -coverprofile=.coverprofiles/xmpp_data.coverprofile    ./xmpp/data
-	go test -coverprofile=.coverprofiles/xmpp_utils.coverprofile    ./xmpp/utils
-	go test -coverprofile=.coverprofiles/ui.coverprofile      ./ui
-	go test -tags $(GTK_BUILD_TAG) -coverprofile=.coverprofiles/gui.coverprofile  ./gui
+	go test -coverprofile=.coverprofiles/xmpp_utils.coverprofile   ./xmpp/utils
+	go test -coverprofile=.coverprofiles/ui.coverprofile           ./ui
 	go test -tags $(GTK_BUILD_TAG) -coverprofile=.coverprofiles/main.coverprofile
 	gover .coverprofiles .coverprofiles/gover.coverprofile
 
 clean-cover:
-	$(RM) -rf .coverprofiles 
+	$(RM) -rf .coverprofiles
 
 # generats an HTML report with coverage information
 cover: run-cover
@@ -122,4 +122,3 @@ deps: deps-dev
 	go get golang.org/x/crypto/scrypt
 	go get github.com/hydrogen18/stalecucumber
 	go get github.com/DHowett/go-plist
-

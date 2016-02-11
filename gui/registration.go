@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/config"
 	"github.com/twstrike/coyim/xmpp/data"
 	"github.com/twstrike/coyim/xmpp/interfaces"
@@ -15,7 +15,7 @@ var (
 )
 
 type registrationForm struct {
-	parent gtk.IWindow
+	parent gtk.Window
 
 	server string
 	conf   *config.Account
@@ -31,7 +31,7 @@ func (f *registrationForm) accepted() error {
 	//Find the fields we need to copy from the form to the account
 	for _, field := range f.fields {
 		ff := field.field.(*data.TextFormField)
-		w := field.widget.(*gtk.Entry)
+		w := field.widget.(gtk.Entry)
 		ff.Result, _ = w.GetText()
 
 		switch ff.Label {
@@ -58,16 +58,16 @@ func (f *registrationForm) renderForm(title, instructions string, fields []inter
 	builder := builderForDefinition("RegistrationForm")
 
 	obj, _ := builder.GetObject("dialog")
-	dialog := obj.(*gtk.Dialog)
+	dialog := obj.(gtk.Dialog)
 	dialog.SetTitle(title)
 
 	obj, _ = builder.GetObject("instructions")
-	label := obj.(*gtk.Label)
+	label := obj.(gtk.Label)
 	label.SetText(instructions)
 	label.SetSelectable(true)
 
 	obj, _ = builder.GetObject("grid")
-	grid := obj.(*gtk.Grid)
+	grid := obj.(gtk.Grid)
 
 	for i, field := range f.fields {
 		grid.Attach(field.label, 0, i+1, 1, 1)
@@ -119,8 +119,8 @@ func requestAndRenderRegistrationForm(server string, formHandler data.FormCallba
 
 type formField struct {
 	field  interface{}
-	label  *gtk.Label
-	widget gtk.IWidget
+	label  gtk.Label
+	widget gtk.Widget
 }
 
 func buildWidgetsForFields(fields []interface{}) []formField {
@@ -130,10 +130,10 @@ func buildWidgetsForFields(fields []interface{}) []formField {
 		switch field := f.(type) {
 		case *data.TextFormField:
 			//TODO: notify if it is required
-			l, _ := gtk.LabelNew(field.Label)
+			l, _ := g.gtk.LabelNew(field.Label)
 			l.SetSelectable(true)
 
-			w, _ := gtk.EntryNew()
+			w, _ := g.gtk.EntryNew()
 			w.SetText(field.Default)
 			w.SetVisibility(!field.Private)
 

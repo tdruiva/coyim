@@ -3,13 +3,13 @@ package gui
 import (
 	"fmt"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/client"
 	"github.com/twstrike/coyim/config"
 	"github.com/twstrike/coyim/i18n"
 )
 
-func buildVerifyFingerprintDialog(accountName string, ourFp []byte, uid string, theirFp []byte) *gtk.Dialog {
+func buildVerifyFingerprintDialog(accountName string, ourFp []byte, uid string, theirFp []byte) gtk.Dialog {
 	var message string
 	var builderName string
 
@@ -44,10 +44,10 @@ Purported fingerprint for %[1]s:
 	builder := builderForDefinition(builderName)
 
 	obj, _ := builder.GetObject("dialog")
-	dialog := obj.(*gtk.Dialog)
+	dialog := obj.(gtk.Dialog)
 
 	obj, _ = builder.GetObject("message")
-	l := obj.(*gtk.Label)
+	l := obj.(gtk.Label)
 	l.SetText(message)
 	l.SetSelectable(true)
 
@@ -55,7 +55,7 @@ Purported fingerprint for %[1]s:
 	return dialog
 }
 
-func verifyFingerprintDialog(account *account, uid string, parent *gtk.Window) gtk.ResponseType {
+func verifyFingerprintDialog(account *account, uid string, parent gtk.Window) gtk.ResponseType {
 	accountConfig := account.session.GetConfig()
 	conversation, _ := account.session.ConversationManager().EnsureConversationWith(uid)
 	ourFp := conversation.OurFingerprint()

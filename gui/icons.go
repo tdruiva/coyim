@@ -3,14 +3,14 @@ package gui
 import (
 	"encoding/hex"
 
-	"github.com/gotk3/gotk3/gdk"
+	gdk "github.com/gotk3/gotk3/gdk/iface"
 )
 
 type icon struct {
 	encoded string
 	size    string
 	decoded []byte
-	cached  *gdk.Pixbuf
+	cached  gdk.Pixbuf
 }
 
 var coyimIcon = &icon{
@@ -1039,9 +1039,9 @@ func (i *icon) get() []byte {
 	return i.decoded
 }
 
-func (i *icon) getPixbuf() *gdk.Pixbuf {
+func (i *icon) getPixbuf() gdk.Pixbuf {
 	if i.cached == nil {
-		pl, _ := gdk.PixbufLoaderNew()
+		pl, _ := g.gdk.PixbufLoaderNew()
 		pl.Write(i.get())
 		pl.Close()
 		pixbuf, _ := pl.GetPixbuf()

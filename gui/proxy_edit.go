@@ -1,11 +1,11 @@
 package gui
 
 import (
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/net"
 )
 
-func getScheme(s *gtk.ComboBoxText) string {
+func getScheme(s gtk.ComboBoxText) string {
 	return net.GetProxyTypeFor(s.GetActiveText())
 }
 
@@ -16,16 +16,16 @@ func orNil(s string) *string {
 	return nil
 }
 
-func (u *gtkUI) editProxy(proxy string, w *gtk.Dialog, onSave func(net.Proxy), onCancel func()) {
+func (u *gtkUI) editProxy(proxy string, w gtk.Dialog, onSave func(net.Proxy), onCancel func()) {
 	prox := net.ParseProxy(proxy)
 
 	b := builderForDefinition("EditProxy")
-	dialog := getObjIgnoringErrors(b, "EditProxy").(*gtk.Dialog)
-	scheme := getObjIgnoringErrors(b, "protocol-type").(*gtk.ComboBoxText)
-	user := getObjIgnoringErrors(b, "user").(*gtk.Entry)
-	pass := getObjIgnoringErrors(b, "password").(*gtk.Entry)
-	server := getObjIgnoringErrors(b, "server").(*gtk.Entry)
-	port := getObjIgnoringErrors(b, "port").(*gtk.Entry)
+	dialog := getObjIgnoringErrors(b, "EditProxy").(gtk.Dialog)
+	scheme := getObjIgnoringErrors(b, "protocol-type").(gtk.ComboBoxText)
+	user := getObjIgnoringErrors(b, "user").(gtk.Entry)
+	pass := getObjIgnoringErrors(b, "password").(gtk.Entry)
+	server := getObjIgnoringErrors(b, "server").(gtk.Entry)
+	port := getObjIgnoringErrors(b, "port").(gtk.Entry)
 
 	net.GetProxyTypeNames(func(name string) {
 		scheme.AppendText(name)

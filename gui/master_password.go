@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/config"
 	"github.com/twstrike/coyim/i18n"
 )
@@ -10,16 +10,16 @@ func (u *gtkUI) captureInitialMasterPassword(k func()) {
 	dialogID := "CaptureInitialMasterPassword"
 	builder := builderForDefinition(dialogID)
 	dialogOb, _ := builder.GetObject(dialogID)
-	pwdDialog := dialogOb.(*gtk.Dialog)
+	pwdDialog := dialogOb.(gtk.Dialog)
 
 	passObj, _ := builder.GetObject("password")
-	password := passObj.(*gtk.Entry)
+	password := passObj.(gtk.Entry)
 
 	pass2Obj, _ := builder.GetObject("password2")
-	password2 := pass2Obj.(*gtk.Entry)
+	password2 := pass2Obj.(gtk.Entry)
 
 	msgObj, _ := builder.GetObject("passMessage")
-	messageObj := msgObj.(*gtk.Label)
+	messageObj := msgObj.(gtk.Label)
 	messageObj.SetSelectable(true)
 
 	builder.ConnectSignals(map[string]interface{}{
@@ -57,7 +57,7 @@ func (u *gtkUI) wouldYouLikeToEncryptYourFile(k func(bool)) {
 	builder := builderForDefinition(dialogID)
 
 	dialogOb, _ := builder.GetObject(dialogID)
-	encryptDialog := dialogOb.(*gtk.MessageDialog)
+	encryptDialog := dialogOb.(gtk.MessageDialog)
 	encryptDialog.SetDefaultResponse(gtk.RESPONSE_YES)
 	encryptDialog.SetTransientFor(u.window)
 
@@ -99,15 +99,15 @@ func (u *gtkUI) getMasterPassword(params config.EncryptionParameters, lastAttemp
 	doInUIThread(func() {
 		builder := builderForDefinition(dialogID)
 		dialogOb, _ := builder.GetObject(dialogID)
-		dialog := dialogOb.(*gtk.Dialog)
+		dialog := dialogOb.(gtk.Dialog)
 
 		cleanup = dialog.Destroy
 
 		passObj, _ := builder.GetObject("password")
-		password := passObj.(*gtk.Entry)
+		password := passObj.(gtk.Entry)
 
 		msgObj, _ := builder.GetObject("passMessage")
-		messageObj := msgObj.(*gtk.Label)
+		messageObj := msgObj.(gtk.Label)
 		messageObj.SetSelectable(true)
 
 		if lastAttemptFailed {

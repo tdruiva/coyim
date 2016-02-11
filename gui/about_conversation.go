@@ -1,20 +1,20 @@
 package gui
 
 import (
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 )
 
 const destroySignal = "destroy"
 
 type aboutConversationWin struct {
-	win *gtk.Window
+	win gtk.Window
 	txt textBox
 }
 
 type textBox struct {
-	view *gtk.TextView
-	buf  *gtk.TextBuffer
-	iter *gtk.TextIter
+	view gtk.TextView
+	buf  gtk.TextBuffer
+	iter gtk.TextIter
 }
 
 func (about aboutConversationWin) add(box textBox) {
@@ -31,7 +31,7 @@ func (about aboutConversationWin) render() {
 }
 
 func newReadOnlyTextBox() textBox {
-	view, _ := gtk.TextViewNew()
+	view, _ := g.gtk.TextViewNew()
 	view.SetEditable(false)
 	view.SetCursorVisible(false)
 

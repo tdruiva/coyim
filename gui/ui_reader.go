@@ -7,10 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gotk3/gotk3/glib"
-	"github.com/gotk3/gotk3/gtk"
-	"github.com/twstrike/coyim/gui/definitions"
 	"reflect"
+
+	glib "github.com/gotk3/gotk3/glib/iface"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
+	"github.com/twstrike/coyim/gui/definitions"
 )
 
 const (
@@ -32,12 +33,12 @@ func getDefinitionWithFileFallback(uiName string) string {
 }
 
 // This must be called from the UI thread - otherwise bad things will happen sooner or later
-func builderForDefinition(uiName string) *gtk.Builder {
+func builderForDefinition(uiName string) gtk.Builder {
 	// assertInUIThread()
 
 	template := getDefinitionWithFileFallback(uiName)
 
-	builder, err := gtk.BuilderNew()
+	builder, err := g.gtk.BuilderNew()
 	if err != nil {
 		//We cant recover from this
 		panic(err)
@@ -78,7 +79,7 @@ func getDefinition(uiName string) fmt.Stringer {
 }
 
 type builder struct {
-	*gtk.Builder
+	gtk.Builder
 }
 
 func newBuilder(uiName string) *builder {
@@ -105,7 +106,7 @@ func (b *builder) getItems(args ...interface{}) {
 	}
 }
 
-func (b *builder) get(name string) glib.IObject {
+func (b *builder) get(name string) glib.Object {
 	obj, err := b.GetObject(name)
 	if err != nil {
 		panic("builder.GetObject() failed: " + err.Error())

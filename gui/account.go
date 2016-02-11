@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/gotk3/gotk3/gtk"
+	gtk "github.com/gotk3/gotk3/gtk/iface"
 	"github.com/twstrike/coyim/config"
 	"github.com/twstrike/coyim/i18n"
 	"github.com/twstrike/coyim/session/access"
@@ -15,8 +15,8 @@ import (
 
 // account wraps a Session with GUI functionality
 type account struct {
-	menu                *gtk.MenuItem
-	currentNotification *gtk.InfoBar
+	menu                gtk.MenuItem
+	currentNotification gtk.InfoBar
 
 	//TODO: Should this be a map of roster.Peer and conversationView?
 	conversations map[string]conversationView
@@ -104,7 +104,7 @@ func (u *gtkUI) showServerSelectionWindow() error {
 	builder := builderForDefinition("AccountRegistration")
 	obj, _ := builder.GetObject("dialog")
 
-	d := obj.(*gtk.Dialog)
+	d := obj.(gtk.Dialog)
 	defer d.Destroy()
 
 	d.SetTransientFor(u.window)
@@ -116,10 +116,10 @@ func (u *gtkUI) showServerSelectionWindow() error {
 	}
 
 	obj, _ = builder.GetObject("server")
-	iter, _ := obj.(*gtk.ComboBox).GetActiveIter()
+	iter, _ := obj.(gtk.ComboBox).GetActiveIter()
 
 	obj, _ = builder.GetObject("servers-model")
-	val, _ := obj.(*gtk.ListStore).GetValue(iter, 0)
+	val, _ := obj.(gtk.TreeModel).GetValue(iter, 0)
 	server, _ := val.GetString()
 
 	form := &registrationForm{
@@ -165,7 +165,7 @@ func (u *gtkUI) addAndSaveAccountConfig(c *config.Account) {
 	}
 	doInUIThread(func() {
 		if u.window != nil {
-			u.window.Emit(accountChangedSignal.String())
+			u.window.Emit(u.accountChangedSignal.String())
 		}
 	})
 }
@@ -177,7 +177,7 @@ func (account *account) destroyMenu() {
 	account.menu = nil
 }
 
-func (account *account) appendMenuTo(submenu *gtk.Menu) {
+func (account *account) appendMenuTo(submenu gtk.Menu) {
 	if account.menu != nil {
 		account.destroyMenu()
 	}
@@ -188,30 +188,30 @@ func (account *account) appendMenuTo(submenu *gtk.Menu) {
 }
 
 func (account *account) buildAccountSubmenu() {
-	menuitem, _ := gtk.MenuItemNew()
+	menuitem, _ := g.gtk.MenuItemNew()
 
 	menuitem.SetLabel(account.session.GetConfig().Account)
 
-	accountSubMenu, _ := gtk.MenuNew()
+	accountSubMenu, _ := g.gtk.MenuNew()
 	menuitem.SetSubmenu(accountSubMenu)
 
-	connectItem, _ := gtk.MenuItemNewWithMnemonic(i18n.Local("_Connect"))
+	connectItem, _ := g.gtk.MenuItemNewWithMnemonic(i18n.Local("_Connect"))
 	accountSubMenu.Append(connectItem)
 
-	disconnectItem, _ := gtk.MenuItemNewWithMnemonic(i18n.Local("_Disconnect"))
+	disconnectItem, _ := g.gtk.MenuItemNewWithMnemonic(i18n.Local("_Disconnect"))
 	accountSubMenu.Append(disconnectItem)
 
-	editItem, _ := gtk.MenuItemNewWithMnemonic(i18n.Local("_Edit..."))
+	editItem, _ := g.gtk.MenuItemNewWithMnemonic(i18n.Local("_Edit..."))
 	accountSubMenu.Append(editItem)
 
-	removeItem, _ := gtk.MenuItemNewWithMnemonic(i18n.Local("_Remove"))
+	removeItem, _ := g.gtk.MenuItemNewWithMnemonic(i18n.Local("_Remove"))
 	accountSubMenu.Append(removeItem)
 
-	connectAutomaticallyItem, _ := gtk.CheckMenuItemNewWithMnemonic(i18n.Local("Connect _Automatically"))
+	connectAutomaticallyItem, _ := g.gtk.CheckMenuItemNewWithMnemonic(i18n.Local("Connect _Automatically"))
 	accountSubMenu.Append(connectAutomaticallyItem)
 	connectAutomaticallyItem.SetActive(account.session.GetConfig().ConnectAutomatically)
 
-	alwaysEncryptItem, _ := gtk.CheckMenuItemNewWithMnemonic(i18n.Local("Always Encrypt Conversation"))
+	alwaysEncryptItem, _ := g.gtk.CheckMenuItemNewWithMnemonic(i18n.Local("Always Encrypt Conversation"))
 	accountSubMenu.Append(alwaysEncryptItem)
 	alwaysEncryptItem.SetActive(account.session.GetConfig().AlwaysEncrypt)
 
@@ -228,7 +228,7 @@ func (account *account) buildAccountSubmenu() {
 	account.menu = menuitem
 }
 
-func (account *account) watchAndToggleMenuItems(connectItem, disconnectItem *gtk.MenuItem) {
+func (account *account) watchAndToggleMenuItems(connectItem, disconnectItem gtk.MenuItem) {
 	account.sessionObserver = make(chan interface{})
 	account.session.Subscribe(account.sessionObserver)
 
@@ -267,11 +267,11 @@ func (account *account) remove() {
 	account.executeCmd(removeAccountCmd{account})
 }
 
-func (account *account) buildNotification(template, msg string) *gtk.InfoBar {
+func (account *account) buildNotification(template, msg string) gtk.InfoBar {
 	builder := builderForDefinition(template)
 
 	builder.ConnectSignals(map[string]interface{}{
-		"handleResponse": func(info *gtk.InfoBar, response gtk.ResponseType) {
+		"handleResponse": func(info gtk.InfoBar, response gtk.ResponseType) {
 			if response != gtk.RESPONSE_CLOSE {
 				return
 			}
@@ -282,25 +282,25 @@ func (account *account) buildNotification(template, msg string) *gtk.InfoBar {
 	})
 
 	obj, _ := builder.GetObject("infobar")
-	infoBar := obj.(*gtk.InfoBar)
+	infoBar := obj.(gtk.InfoBar)
 
 	obj, _ = builder.GetObject("message")
-	msgLabel := obj.(*gtk.Label)
+	msgLabel := obj.(gtk.Label)
 	msgLabel.SetSelectable(true)
 	msgLabel.SetText(msg)
 
 	return infoBar
 }
 
-func (account *account) buildConnectionNotification() *gtk.InfoBar {
+func (account *account) buildConnectionNotification() gtk.InfoBar {
 	return account.buildNotification("ConnectingAccountInfo", fmt.Sprintf(i18n.Local("Connecting account\n%s"), account.session.GetConfig().Account))
 }
 
-func (account *account) buildConnectionFailureNotification() *gtk.InfoBar {
+func (account *account) buildConnectionFailureNotification() gtk.InfoBar {
 	return account.buildNotification("ConnectionFailureNotification", fmt.Sprintf(i18n.Local("Connection failure\n%s"), account.session.GetConfig().Account))
 }
 
-func (account *account) buildTorNotRunningNotification() *gtk.InfoBar {
+func (account *account) buildTorNotRunningNotification() gtk.InfoBar {
 	return account.buildNotification("TorNotRunningNotification", i18n.Local("Tor is not currently running"))
 }
 
@@ -312,7 +312,7 @@ func (account *account) removeCurrentNotification() {
 	}
 }
 
-func (account *account) removeCurrentNotificationIf(ib *gtk.InfoBar) {
+func (account *account) removeCurrentNotificationIf(ib gtk.InfoBar) {
 	if account.currentNotification == ib {
 		account.currentNotification.Hide()
 		account.currentNotification.Destroy()
@@ -320,7 +320,7 @@ func (account *account) removeCurrentNotificationIf(ib *gtk.InfoBar) {
 	}
 }
 
-func (account *account) setCurrentNotification(ib *gtk.InfoBar, notificationArea *gtk.Box) {
+func (account *account) setCurrentNotification(ib gtk.InfoBar, notificationArea gtk.Box) {
 	account.Lock()
 	defer account.Unlock()
 
