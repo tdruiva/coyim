@@ -16,6 +16,7 @@ import (
 	gdk "github.com/gotk3/gotk3/gdk/iface"
 	glib "github.com/gotk3/gotk3/glib/iface"
 	gtk "github.com/gotk3/gotk3/gtk/iface"
+	pango "github.com/gotk3/gotk3/pango/iface"
 )
 
 type gtkUI struct {
@@ -52,17 +53,19 @@ type gtkUI struct {
 
 // Graphics represent the graphic configuration
 type Graphics struct {
-	gtk  gtk.GtkSince310
-	glib glib.Glib
-	gdk  gdk.Gdk
+	gtk   gtk.GtkSince310
+	glib  glib.Glib
+	gdk   gdk.Gdk
+	pango pango.Pango
 }
 
 // CreateGraphics creates a Graphic represention from the given arguments
-func CreateGraphics(gtkVal gtk.GtkSince310, glibVal glib.Glib, gdkVal gdk.Gdk) Graphics {
+func CreateGraphics(gtkVal gtk.GtkSince310, glibVal glib.Glib, gdkVal gdk.Gdk, pangoVal pango.Pango) Graphics {
 	return Graphics{
-		gtk:  gtkVal,
-		glib: glibVal,
-		gdk:  gdkVal,
+		gtk:   gtkVal,
+		glib:  glibVal,
+		gdk:   gdkVal,
+		pango: pangoVal,
 	}
 }
 

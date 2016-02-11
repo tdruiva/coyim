@@ -76,7 +76,8 @@ func newDisplaySettings() *displaySettings {
 
 func detectCurrentDisplaySettingsFrom(w gtk.Widget) *displaySettings {
 	styleContext, _ := w.GetStyleContext()
-	property, _ := styleContext.GetProperty2("font", gtk.STATE_FLAG_NORMAL)
+	property, aa := styleContext.GetProperty2("font", gtk.STATE_FLAG_NORMAL)
+	fmt.Printf("aa: %#v, is nil: %v\n", aa, property == nil)
 	fontDescription := property.(pango.FontDescription)
 
 	size := uint(fontDescription.GetSize() / pango.PANGO_SCALE)
