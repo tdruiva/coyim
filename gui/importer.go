@@ -26,13 +26,17 @@ type applicationAndAccount struct {
 }
 
 func (u *gtkUI) doActualImportOf(choices map[applicationAndAccount]bool, potential map[string][]*config.ApplicationConfig) {
+	log.Printf("doActualImportOf()")
 	for k, v := range choices {
 		if !v {
 			continue
 		}
 
+		log.Printf(" - doActualImportOf() - looking at %s", k.app)
 		for _, accs := range potential[k.app] {
+			log.Printf(" - doActualImportOf() - looking for %s", k.acc)
 			for _, a := range accs.Accounts {
+				log.Printf("   - doActualImportOf() - comparing with %s", a.Account)
 				if a.Account == k.acc {
 					log.Printf("[import] Doing import of %s from %s", k.acc, k.app)
 					accountToImport := a
@@ -66,6 +70,7 @@ func (u *gtkUI) doActualImportOf(choices map[applicationAndAccount]bool, potenti
 }
 
 func (u *gtkUI) runImporter() {
+	log.Printf("runImporter()")
 	importSettings := make(map[applicationAndAccount]bool)
 	allImports := importer.TryImportAll()
 
@@ -77,6 +82,7 @@ func (u *gtkUI) runImporter() {
 	store, _ := builder.GetObject("importAccountsStore")
 	s := store.(gtki.ListStore)
 
+	log.Printf(" - runImporter() - have %d possible accounts", len(allImports))
 	for appName, v := range allImports {
 		for _, vv := range v {
 			for _, a := range vv.Accounts {
@@ -97,12 +103,14 @@ func (u *gtkUI) runImporter() {
 		app, _ := valAt(s, iter, 0).(string)
 		acc, _ := valAt(s, iter, 1).(string)
 
+		log.Printf(" - runImporter() - have toggle on %s, %s", app, acc)
 		importSettings[applicationAndAccount{app, acc}] = !current
 
 		s.SetValue(iter, 2, !current)
 	})
 
 	w.Connect("response", func(_ interface{}, rid int) {
+		log.Printf(" - runImporter() - have response ID: %d, where OK is: %d", rid, gtki.RESPONSE_OK)
 		if gtki.ResponseType(rid) == gtki.RESPONSE_OK {
 			u.doActualImportOf(importSettings, allImports)
 		}
