@@ -2,9 +2,16 @@
 
 set -x
 
-sudo apt-get update -qq
-sudo apt-get install -qq -y libgtk-3-dev gettext libglib2.0-dev libc6-dev-i386
-sudo apt-get install -qq -y xvfb
+# This is now in travis file wo we dont need to use sudo
+#sudo apt-get update -qq
+#sudo apt-get install -qq -y libgtk-3-dev gettext libglib2.0-dev libc6-dev-i386
+#sudo apt-get install -qq -y xvfb
+
+#
+# GUI tests seems to be disabled
+#
+exit 0
+
 # sudo /usr/bin/Xvfb $DISPLAY 2>&1 > /dev/null &
 sh -e /etc/init.d/xvfb start
 sleep 3 # wait for xvfb
