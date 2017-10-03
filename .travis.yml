@@ -35,6 +35,9 @@ cache:
     - $HOME/Library/Caches/Homebrew
     - /usr/local/Homebrew
 
+before_cache:
+  - brew cleanup
+
 before_install:
   - "export DISPLAY=:99.0"
   - ci/install-deps-${TRAVIS_OS_NAME:-linux}
