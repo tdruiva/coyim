@@ -72,6 +72,7 @@ func (u *gtkUI) newRoster() *roster {
 	obj = builder.getObj("roster-tree")
 	r.view = obj.(gtki.TreeView)
 	r.view.SetEnableSearch(true)
+	r.view.SetSearchColumn(indexDisplayName)
 
 	obj = builder.getObj("roster-model")
 	r.model = obj.(gtki.TreeStore)
@@ -558,7 +559,7 @@ func createTooltipFor(item *rosters.Peer) string {
 	return jid
 }
 
-func (r *roster) addItem(item *rosters.Peer, parentIter gtki.TreeIter, indent string) {
+func (r *roster) addItem(item *rosters.Peer, parentIter gtki.TreeIter) {
 	cs := r.ui.currentColorSet()
 	iter := r.model.Append(parentIter)
 	potentialExtra := ""
@@ -567,7 +568,7 @@ func (r *roster) addItem(item *rosters.Peer, parentIter gtki.TreeIter, indent st
 	}
 	setAll(r.model, iter,
 		item.Jid,
-		fmt.Sprintf("%s %s%s", indent, item.NameForPresentation(), potentialExtra),
+		fmt.Sprintf("%s%s", item.NameForPresentation(), potentialExtra),
 		item.BelongsTo,
 		decideColorFor(cs, item),
 		cs.rosterPeerBackground,
@@ -686,7 +687,7 @@ func (r *roster) displayGroup(g *rosters.Group, parentIter gtki.TreeIter, accoun
 		groupCounter.inc(vs, vs && o)
 
 		if shouldDisplay(item, showOffline, showWaiting) {
-			r.addItem(item, pi, "")
+			r.addItem(item, pi)
 		}
 	}
 

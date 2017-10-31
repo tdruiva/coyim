@@ -70,7 +70,6 @@ func (u *gtkUI) decreaseFontSize(w gtki.Window) {
 
 func (u *gtkUI) showSearchBar(w gtki.Window) {
 	u.search.SetSearchMode(true)
-	u.searchEntry.SetCanFocus(true)
 }
 
 func (u *gtkUI) closeApplication(w gtki.Window) {

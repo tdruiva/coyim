@@ -758,7 +758,6 @@ func (u *gtkUI) initMenuBar() {
 }
 
 func (u *gtkUI) initSearchBar() {
-	u.searchEntry.SetCanFocus(false)
 	u.searchEntry.SetWidthChars(35)
 
 	u.search.ConnectEntry(u.searchEntry)
