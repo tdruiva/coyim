@@ -29,7 +29,7 @@
         <property name="model">roster-model</property>
         <property name="headers-visible">false</property>
         <property name="show-expanders">false</property>
-        <property name="level-indentation">3</property>
+        <property name="level-indentation">10</property>
         <!-- TODO remove magic number -->
         <property name="tooltip-column">6</property>
         <signal name="row-activated" handler="on_activate_buddy" />
@@ -52,7 +52,6 @@
         </child>
         <child>
           <object class="GtkTreeViewColumn" id="name-column">
-            <property name="title">name</property>
             <child>
               <object class="GtkCellRendererText" id="name-column-rendered"/>
               <attributes>

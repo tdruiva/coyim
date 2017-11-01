@@ -481,7 +481,7 @@ func (u *gtkUI) mainWindow() {
 		doInUIThread(u.addFeedbackInfoBar)
 	})
 
-	u.search = builder.getObj("search-area").(gtki.SearchBar)
+	u.search = builder.getObj("search-bar").(gtki.SearchBar)
 	u.searchEntry = builder.getObj("search-entry").(gtki.Entry)
 	u.initSearchBar()
 
@@ -759,6 +759,8 @@ func (u *gtkUI) initMenuBar() {
 
 func (u *gtkUI) initSearchBar() {
 	u.searchEntry.SetWidthChars(35)
+	u.searchEntry.SetCanFocus(true)
+	u.search.SetCanFocus(true)
 
 	u.search.ConnectEntry(u.searchEntry)
 	u.roster.view.SetSearchEntry(u.searchEntry)
